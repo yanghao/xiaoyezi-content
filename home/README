@@ -1,0 +1,18 @@
+# Home for xiaoyezi.org
+------------------------
+
+This is the home page of Hua Yanghao, documenting various technologies and ideas
+which he wants to share with you.
+
+It took quite some time to build this site, a site that he understands every
+gut of it. First he tried Django, then google appengine. But these all doesn't
+work out so well. For what he needs is an extremely simple to maintain, fast
+to serve and flexible to change web site infrastructure, and there should be
+no black box in such a setup.
+
+Finally, he gets to develop it from scratch, and it took only a week to do so.
+Much faster than reading the specs and manual of the existing frameworks.
+
+This is the place for fun, and hopefully you enjoyed your stay here.
+
+Good luck and have fun.
