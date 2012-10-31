@@ -1,0 +1,22 @@
+Radio is yet to be invented. Again.
+===================================
+
+Radio was considered very hardware bounded
+technology. You need Radio Frequency front end,
+you need digital signal processing hardware,
+and then comes some high-level software stuff.
+
+But now, with the concept of SDR (Software Defined Radio),
+it all changed. As now the personal computer processing
+power (together with the parrallel processing power of graphics engine),
+many radio technologies that was once existed only on
+dedicated hardware can now also be implemented in pure software.
+Heard about LTE? [Fabrice Bellard implemented a LTE base station in
+software](http://bellard.org/lte/ "LTE in Software").
+
+The even more exciting thing is, with USRP you can afford
+such an SDR platform just at home. Oh yes, you still need
+some hardware for SDR, but basically the hardware does is to
+down convert the radio fequency signal to base band frequency signal
+and sample the base band signal with a very high speed analog to
+digital converter and vice versa. And there the creativity goes ;-)
