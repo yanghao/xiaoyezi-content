@@ -1,0 +1,74 @@
+小站是怎样建成的 ---- nginx + uwsgi + python
+============================================
+
+说起web服务器，很多人首先想到的可能还是[Apache](http://projects.apache.org/projects/http_server.html)。
+而说起[Nginx](http://nginx.org)，很多人首先想到的可能还是静态文件的服务。
+
+Apache和Nginx代表了[HTTP](http://en.wikipedia.org/wiki/Http)服务器设计的两种截然不同的思路。
+Apache是一个访问请求对应一个服务器上的进程，而Nginx是一个进程可以同时处理很多请求。
+这两种设计各有优缺点。Apache简单，相应功能多，比较消耗系统资源；Nginx实现起来复杂一些，刚开始
+功能较少，但很轻量，消耗资源远少于Apache。所以很多人都用Nginx来服务静态网页，而用Apache来
+作[CGI](http://en.wikipedia.org/wiki/Common_Gateway_Interface)服务（即动态生成网页）。
+
+Nginx除了被用作静态网页的服务外，还经常被用来作[反向代理](http://en.wikipedia.org/wiki/Reverse_Proxy)。
+反向代理给Nginx带来了一个意想不到的好处就是，Nginx可以很容易的与别的HTTP服务器联合使用。
+比如很多网站面向用户的最前端用的是Nginx，而对于每一个用户请求，Nginx又会向后台几十个Apache的服务器
+转发这个请求。Nginx的设计决定了它可以长时间与大量用户端保持连接状态，而且可以自动均衡后台Apache
+服务器的负载。
+
+[uwsgi](http://projects.unbit.it/uwsgi/)是一个符合[Python](http://python.org)[WSGI](http://www.python.org/dev/peps/pep-0333/)
+接口规范的服务器。WSGI是Python的服务器应用程序与服务器之间的一套标准接口。
+
+Python是我除了Ｃ和汇编以外经常使用的唯一一种程序设计语言。任何可能在Python下做的开发，我都不会选择其它语言。
+为什么？因为一个字：快。Python有很简洁的方法（仅次于没有语法的[Lisp](http://en.wikipedia.org/wiki/Lisp_(programming_language)))，
+非常好的易读性。正因为此，大量的开发者为Python贡献了大量的代码库，使得Python的使用者可以高屋建瓴，拿起很
+多现成的库，快速的完成开发。Python的代码执行效率要远差于C和Java，甚至也差于Perl。但近年了随着[PyPy](http://pypy.org)
+等项目的发展，Python的执行效率在很多情况下以经大大提高。
+
+说完了这些背景，也就基本上说完了这个小站是如何建立的。
+Nginx是前端，UWSGI是Python服务程序的服务器，所有的网页都是Python下的标准WSGI应用。
+Nginx会把请求转发给UWSGI的服务器，UWSGI服务器运行Python的WSGI应用，将产生的结果（网页）返回给Nginx，
+最后，Nginx把结果返回给请求的用户。这就是这个小站上网页产生的基本原理。
+
+[UNIX](http://en.wikipedia.org/wiki/UNIX)设计理念中的重要一条就是：每一个程序都只做一件事，并把这一件事做好。
+在这里，Nginx司职反向代理，只做这一件事。UWSGI也只做一件事，就是运行Python的WSGI应用。这样的架构，对系统来说
+是引入了一些额外的负担，但是好处是，Nginx和UWSGI可以随时被更好的替代品换掉。系统的每一个关键环节，一直都有
+使用最优秀产品的灵活性。
+
+最后说一下Python的wsgi应用。Python世界与Java、Ruby世界不太一样，没有一个统一的应用最广泛的网络应用架构，这些现成的
+架构有简单的、不太完善的，也有功能强大、同时也很复杂的。大部分完整的应用架构，都与数据库密不可分。用简单的架构，许多
+东西需要重新去开发。而用复杂的架构，开发快，但很多地方不能完全满足自己的需求，而且也要承担自己不需要功能所引入的系统
+复杂性。我挑来选去，用了[webapp2](http://webapp-improved.appspot.com)
+(请自备梯子）作WSGI应用的基础，即把URL跟据正则表达式的匹配分发给不同的请求处理函数，以及它的Request和Response对象（webapp2
+实际上使用的是[WebOb](http://webob.org)的Request和Response对象）。然后使用[mako
+template](http://makotemplates.org)作模板处理，mako与其它python下的模板处理最大的不同是，你可以在模板中使用python的几乎任何语法。
+我的博客都是用[markdown](http://daringfireball.net/projects/markdown/)方法写成的普通文本文件，然后博客中嵌入的程序片断用
+[python-markdown](http://freewisdom.org/projects/python-markdown/）中对markdown增加的一个基于[pygments](http://pygments.org/)语法高亮
+显示的插件，来产生如下的效果：
+
+        #!python
+        import sys
+
+        def f(foo):
+                print("foo is: " % str(foo))
+
+上面是一个Python程序片断，下面是一个C程序片断：
+
+        #!c
+        #include <stdio.h>
+
+        static int G_XYZ;
+
+        int main(int argc, char **argv)
+        {
+                printf("Hello world! G_XYZ: %d\n", G_XYZ);
+
+                return 0;
+        }
+
+除此之外，博客的编写是用任何普通的文本编辑器，我的最爱是[VIM](http://vim.org)。所有的博客内容用[GIT](http://git-scm.com)管理起来。
+
+忘记提到的一点是，所有的网页都会被缓存在服务器内存中，因此速度非常的快。很多的framework自带都是支持的[memcached](http://memcached.org)，
+包括我用的webapp2，但是我懒得去查怎么用webapp2支持memcached，所以就自己实现了一个，按照自己定义的逻辑来缓存网页。
+
+作为一个专业是集成电路设计的业余嵌入式程序爱好者，我深深的陷入到网络程序设计而不能自拔。。
