@@ -46,25 +46,27 @@ template](http://makotemplates.org)作模板处理，mako与其它python下的�
 [python-markdown](http://freewisdom.org/projects/python-markdown/）中对markdown增加的一个基于[pygments](http://pygments.org/)语法高亮
 显示的插件，来产生如下的效果：
 
-        #!python
-        import sys
+    #!python
 
-        def f(foo):
-                print("foo is: " % str(foo))
+    import sys
+
+    def f(foo):
+        print("foo is: " % str(foo))
 
 上面是一个Python程序片断，下面是一个C程序片断：
 
-        #!c
-        #include <stdio.h>
+    #!c
 
-        static int G_XYZ;
+    #include <stdio.h>
 
-        int main(int argc, char **argv)
-        {
-                printf("Hello world! G_XYZ: %d\n", G_XYZ);
+    static int G_XYZ;
 
-                return 0;
-        }
+    int main(int argc, char **argv)
+    {
+            printf("Hello world! G_XYZ: %d\n", G_XYZ);
+
+            return 0;
+    }
 
 除此之外，博客的编写是用任何普通的文本编辑器，我的最爱是[VIM](http://vim.org)。所有的博客内容用[GIT](http://git-scm.com)管理起来。
 
