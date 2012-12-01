@@ -68,7 +68,7 @@ template](http://makotemplates.org)作模板处理，mako与其它python下的�
             return 0;
     }
 
-除此之外，博客的编写是用任何普通的文本编辑器，我的最爱是[VIM](http://vim.org)。所有的博客内容用[GIT](http://git-scm.com)管理起来。
+除此之外，博客的编写是用任何普通的文本编辑器，我的最爱是[VIM](http://www.vim.org)。所有的博客内容用[GIT](http://git-scm.com)管理起来。
 
 忘记提到的一点是，所有的网页都会被缓存在服务器内存中，因此速度非常的快。很多的framework自带都是支持的[memcached](http://memcached.org)，
 包括我用的webapp2，但是我懒得去查怎么用webapp2支持memcached，所以就自己实现了一个，按照自己定义的逻辑来缓存网页。
