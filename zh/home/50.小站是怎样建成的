@@ -43,7 +43,7 @@ Nginx会把请求转发给UWSGI的服务器，UWSGI服务器运行Python的WSGI�
 实际上使用的是[WebOb](http://webob.org)的Request和Response对象）。然后使用[mako
 template](http://makotemplates.org)作模板处理，mako与其它python下的模板处理最大的不同是，你可以在模板中使用python的几乎任何语法。
 我的博客都是用[markdown](http://daringfireball.net/projects/markdown/)方法写成的普通文本文件，然后博客中嵌入的程序片断用
-[python-markdown](http://freewisdom.org/projects/python-markdown/）中对markdown增加的一个基于[pygments](http://pygments.org/)语法高亮
+[python markdown](http://freewisdom.org/projects/python-markdown/）中对markdown增加的一个基于[pygments](http://pygments.org/)语法高亮
 显示的插件，来产生如下的效果：
 
     #!python
