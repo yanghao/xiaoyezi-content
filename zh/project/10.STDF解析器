@@ -1,0 +1,14 @@
+STDF 解析器
+===========
+
+STDF是芯片测试所产生的标准二进制数据格式。它有两种版本：版本3和版本4。
+
+这个项目构建了一种通用的易于扩展的解析器架构，使得对未来新版本和新的Record Type
+的支持非常容易。
+
+基于STDF解析器，可以构建更复杂的自动化数据处理和分析软件。
+
+项目地址
+--------
+
+[http://code.google.com/p/stdfparser](http://code.google.com/p/stdfparser)
