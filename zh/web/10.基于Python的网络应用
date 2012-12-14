@@ -1,0 +1,108 @@
+Nginx + UWSGI + Python 的一点儿经验
+===================================
+
+当你想用Python做网络应用的时候，第一件事也许就是
+选好一个[WSGI](http://www.python.org/dev/peps/pep-0333/)
+服务器。这种满足WSGI规范的服务器非常多，像Google的
+AppEngine就支持这种规范。[UWSGI](http://projects.unbit.it/uwsgi/)
+就是一个支持WSGI规范的应用服务器。UWSGI和[Nginx](http://nginx.org)
+之间通过UWSGI的一种特殊的二进制协议进行通信。Nginx是
+HTTP服务器，它的作用是接受访问请求并把请求按一定规则进行处理。
+比如，如果请求的是由Nginx服务的形态文件，那么Nginx就会把
+请求的文件内容发送给请求的客户端。Nginx和Apache最大的不同是，
+Apache是基于每一个进程处理一个请求，而Nginx则是一个进程可以用非阻塞
+的方式异步的处理多个请求。因为这个特点，Nginx可以同时维持很多
+活跃的TCP连接而只占用较少的系统资源（操作系统里，每产生一个新的进程，
+都需要操作系统去维护一些跟这个进程相关的资源）。这种差别在请求数量
+较少的时候看不出区别，但对于请求量非常大的站点，则差别巨大。
+Nginx还有一个最大的特点是可以被用作*反向代理*，自动作负载均衡。
+
+所以，这样的系统结构就是Nginx接受请求，然后把请求转发给UWSGI进程。
+UWSGI进程接收到请求后去调用Python应用的WSGI接口。至此，Python应用
+程序收到请求，作相就的处理，然后返回结果。结果由Python返回给UWSGI，
+然后UWSGI又返回给Nginx，最终Nginx把请求返回给请求的客户端。
+
+进程间的锁
+==========
+
+UWSGI在使用时，可以设定同时运行的进程数。每一个进程都是完全独立的，
+互相不影响。这也就意味着，如果要操作一些全局资源时（不是全局变量，
+全局变量在每个进程中也是独立的拷贝，进程间互不影响），比如多个进程
+同时操作同一个文件系统上的文件，就有可能发生竞争，产生不可预料的结果。
+
+在多线程的程序设计中，我们有很多现成的“锁”资源可以用，比如说mutex_lock，
+spin_lock和信号量Semaphore。但这些“锁”资源都是基于一个前提，就是多个
+*线程*间共享地址空间。说的更直白一些就是多个线程间可以共享*同一个变量*。
+但在多*进程*程序设计中，所有的地址空间都是相互独立的，不可能继续使用传统
+多线程的“锁”资源了。但不可避免的，多进程间有可能同时对一些*全局*资源
+进行共享，比如一个要读一个文件系统上的文件，而另一个要写同一个文件。
+
+在UNIX系统上，基本上都有对文件锁定的实现。BSD和Linux上有系统调用*flock*，
+而其它UNIX系统上有相应的fcntl实现。所以，用flock作为进程锁的实现是一个
+不错的主意。下面的代码是我在Linux上面实现的进程间锁：
+
+    #!python
+    import os
+    import fcntl
+
+    class Lock:
+        def __init__(self, lock_name, root='/run/lock/pylock'):
+            if not os.path.isdir(root):
+                os.mkdir(root)
+                self.filepath = os.path.join(root, lock_name)
+                self.root = root
+                self.lock_name = lock_name
+                self.fd = 0
+
+        def __enter__(self):
+            self.lock()
+
+        def __exit__(self, type, value, tracback):
+            self.unlock()
+
+        def lock(self):
+            self.fd = open(self.filepath, 'w')
+            fcntl.flock(self.fd, fcntl.LOCK_EX)
+
+        def unlock(self):
+            fcntl.flock(self.fd, fcntl.LOCK_UN)
+            self.fd.close()
+
+这个锁通过在全局文件系统上的一个特殊文件夹`/run/lock/pylock`中创建
+一个以字符串命名的锁，在不同进程间标识所使用的锁。只要名字一样，锁
+就一样。当文件被打开时，同时请求锁定文件。在文件关闭之前，先解锁。
+在使用时非常简单：
+
+    #!python
+    from lock import Lock
+
+    mylock = Lock("mylock")
+    mylock.lock()
+    do_critical_section()
+    mylock.unlock()
+
+上面的代码同时实现了Python的`with`协议，所以可以使用更简洁的语法：
+
+    #!python
+    from lock import Lock
+    mylock = Lock("mylock")
+    with mylock:
+        do_critical_section()
+
+这样，就有了一个多进程间可以使用的锁，而且使用起来跟传统的锁没有什么区别。
+当然，这样的锁只能在同一个机器上同一个操作系统下起作用。在分布式系统中，
+当不同机器上的进程间需要互相同步，就需要像[ZooKeeper](http://wiki.apache.org/hadoop/ZooKeeper)
+这样的网络应用，来提供锁的机制。
+
+发现的问题
+==========
+
+Nginx + UWSGI一直运行的很稳定，直到有一天测试时发现，当一个HTTP的PUT请求在
+Content-Length不为0时，会影响下一个请求的正确执行，Nginx会报400错误。仔细
+调试后发现，问题是由于Nginx的`keepalive_timeout`设置为65秒，且`keepalive_requests`默认
+为100，同时在`httplib2`里我双是用的同一个`Http()`实例去发送这些请求，
+也就是说出现问题的前后两个请求其实是在同一个TCP连接中进行的。这是一个Nginx
+和UWSGI的配合问题。只要不在同一个`Http()`实例中去发请求，或者是关闭Nginx的
+`keepalive`功能，都可以解决这个问题。应该去进一步研究倒底是谁出了问题。
+
+EOF
