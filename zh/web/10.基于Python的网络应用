@@ -109,6 +109,7 @@ Content-Length不为0时，会影响下一个请求的正确执行，Nginx会报
 他们也无法继续接收这样一个请求返回的HTTP的`body`。当使用python-httplib2这一类
 客户端的时候，Python会报下面的错误：
 
+    #!python
     File "/usr/lib/python2.7/dist-packages/httplib2/__init__.py", line 1444, in request
         (response, content) = self._request(conn, authority, uri, request_uri, method, body, headers, redirections, cachekey)
     File "/usr/lib/python2.7/dist-packages/httplib2/__init__.py", line 1196,
@@ -125,5 +126,17 @@ Content-Length不为0时，会影响下一个请求的正确执行，Nginx会报
 
     PUT /app/config/yanghao.hua@intel.com/test_x_config => generated 51 bytes in
     0 msecs (HTTP/1.1 404) 3 headers in 97 byt...
+
+当给每一个`Request Handler`的第一句加上：
+
+    body = self.request.body
+
+然后再开启Nginx的keepalive_timeout为65秒，上述的400错误也消失了。由此可以猜测，之前的400错误也是
+和没有consume http请求中的`body`有关。
+
+当然，每个request hander一开始就来一句`body = self.request.body`并不好，也许可以做到
+`webapp2`的`RequestHandler`里面去，但并不清楚对于更普遍的应用会有何影响。比如，也许有些请求当发现
+http header里面有条件不满足时（比如没有Authenticate），就压根不去使用`self.request.body`，这时也许可以
+根本不用去等待网络IO的结束，提高效率。
 
 EOF
