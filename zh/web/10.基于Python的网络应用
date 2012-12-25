@@ -105,4 +105,25 @@ Content-Length不为0时，会影响下一个请求的正确执行，Nginx会报
 和UWSGI的配合问题。只要不在同一个`Http()`实例中去发请求，或者是关闭Nginx的
 `keepalive`功能，都可以解决这个问题。应该去进一步研究倒底是谁出了问题。
 
+进一步又发现，无论是Nginx还是Apache，当他们发出的请求的`body`没有被及时使用的时候，
+他们也无法继续接收这样一个请求返回的HTTP的`body`。当使用python-httplib2这一类
+客户端的时候，Python会报下面的错误：
+
+    File "/usr/lib/python2.7/dist-packages/httplib2/__init__.py", line 1444, in request
+        (response, content) = self._request(conn, authority, uri, request_uri, method, body, headers, redirections, cachekey)
+    File "/usr/lib/python2.7/dist-packages/httplib2/__init__.py", line 1196,
+        in _request (response, content) = self._conn_request(conn, request_uri, method, body, headers)
+    File "/usr/lib/python2.7/dist-packages/httplib2/__init__.py", line 1179, in _conn_request
+        content = response.read()
+    File "/usr/lib/python2.7/httplib.py", line 548, in read
+        s = self._safe_read(self.length)
+    File "/usr/lib/python2.7/httplib.py", line 649, in _safe_read
+        raise IncompleteRead(''.join(s), amt)
+    httplib.IncompleteRead: IncompleteRead(0 bytes read, 51 more expected)
+
+如果查看uWSGI的log，会发现其实Python Application已经正常产生了相应的Response:
+
+    PUT /app/config/yanghao.hua@intel.com/test_x_config => generated 51 bytes in
+    0 msecs (HTTP/1.1 404) 3 headers in 97 byt...
+
 EOF
