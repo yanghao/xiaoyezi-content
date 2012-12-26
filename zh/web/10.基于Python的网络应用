@@ -92,7 +92,8 @@ spin_lock和信号量Semaphore。但这些“锁”资源都是基于一个前�
 这样，就有了一个多进程间可以使用的锁，而且使用起来跟传统的锁没有什么区别。
 当然，这样的锁只能在同一个机器上同一个操作系统下起作用。在分布式系统中，
 当不同机器上的进程间需要互相同步，就需要像[ZooKeeper](http://wiki.apache.org/hadoop/ZooKeeper)
-这样的网络应用，来提供锁的机制。
+这样的网络应用，来提供锁的机制。IBM的DeveloperWorks上面有一篇不错的关于
+[Linux中的文件锁](http://www.ibm.com/developerworks/cn/linux/l-cn-filelock/index.html)的文章。
 
 发现的问题
 ==========
