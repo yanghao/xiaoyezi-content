@@ -1,0 +1,74 @@
+什么是ZigBee
+============
+
+ZigBee是一种无线通信技术标准，用于工业控制或家用传感器网络。
+它比WIFI要简单的多，而且根据RF的不同功率大小可以进行超远距离通信（好几十公里）。
+
+XBEE from DIGI
+==============
+DIGI的XBEE S2模块是DIGI基于freescale的ZigBee解决方案开发的。
+国内还有基于TI的解决方案做的开发模块，不过远不如DIGI的解决方案成熟和完整。
+
+XBEE S2与S1的不同
+================
+S1买回来就可以进行点对点的通信。因为S1其实并不是ZigBee协议的。S1只不过借用了
+ZigBee的air-interface，上层却是DIGI的私有协议。
+
+S2是标准的ZigBee协议的。一个最简单的ZigBee网络，至少需要一个coordinator，负责
+这个网络的总体协调。基它router或end device可以加入一个coordinator管理的网络。
+
+S2买回来里面的firmware默认是router AT，需要用X-CTU烧写一个coordinator
+AT的firmware。
+
+有了coordinator和router/end device，下来只要把地址配置正确，一个coordinator和
+一个router/end device就可以正常通信了。一个router/end device要加入一个网络，首先
+要知道这个网络的ID。这个ID是由coordinator决定的。当这个router/end device加入了
+一个网络，coordinator会给这个router/end device分配一个信道(CH)。
+
+此时，这个router/end device就可以与coordinator通信了。ZigBee网络中的每一个节点，
+不管是coordinator还是router/end device,
+都有一个64位的地址。coordinator的地址可以用0x0000000000000000全零来指定，也可以
+用coordinator出厂时的SH与SL地址来表示。而coordinator要与router/end device通信，
+只能用SH/SL。还有一个特殊的广播地址：0x000000000000FFFF。
+
+用X-CTU进行设置
+===============
+很不幸，X-CTU只有windows版本。当仅仅使用AT命令与XBEE模块通信时，X-CTU并不是必须的。
+很简单的串口收发在程序里很易实现。但注意大部分的串口工具在使用上都有问题。
+
+-  进入命令模式必须是连续发三个加号（+++），而且之前和之后都不能有多余的字符。
+   很多串号工具都是等你输入回车以后把字符和回车（或者把LF转换成CR）来发送，
+   这样是无法进入命令行的。我是直接写程序来实现的:
+
+
+    import os
+    import sys
+    import time
+    from serial import Serial
+
+    port = sys.argv[1]
+
+    ser = Serial('/dev/%s' % port, baudrate=9600, bytesize=8, parity='N', stopbits=1, timeout=0.5, writeTimeout=1)
+
+    while True:
+        i = raw_input()
+        i = i.strip()
+        if i == '+++':
+            pass
+        else:
+            i = i + '\r'
+        print("Sending (%s) ..." % i.strip())
+        ser.write(i)
+        time.sleep(1)
+        print('---> ' + ser.read(80).strip() + '\n')
+
+-  当进入命令模式以后，所有的命令都是以<CR>来结束，而不是以<LF>。
+
+-  当使用X-CTU更新参数时，一定要选上"always update firmware"。
+   貌似只有这样，新的参数才会生效，否则即使重启板子也有点儿问题。
+
+X-CTU在GNU/Linux下使用其实也很简单。只要用wine安装X-CTU，然后在`~/.wine/dosdevices`下面
+安装一些符号链接，比如COM5 --> /dev/ttyUSB0，COM6 --> /dev/ttyACM0，就好了。
+然后正常启动X-CTU，与windows版本不同的是wine下面的X-CTU不能自动发现COM口。需要手动添加。
+
+然后就一切正常了，烧一个coordinator AT的firmware，开始你的ZigBee之旅吧。
