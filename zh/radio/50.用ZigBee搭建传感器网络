@@ -40,27 +40,27 @@ AT的firmware。
    很多串号工具都是等你输入回车以后把字符和回车（或者把LF转换成CR）来发送，
    这样是无法进入命令行的。我是直接写程序来实现的:
 
+        #!python
+        import os
+        import sys
+        import time
+        from serial import Serial
 
-    import os
-    import sys
-    import time
-    from serial import Serial
+        port = sys.argv[1]
 
-    port = sys.argv[1]
+        ser = Serial('/dev/%s' % port, baudrate=9600, bytesize=8, parity='N', stopbits=1, timeout=0.5, writeTimeout=1)
 
-    ser = Serial('/dev/%s' % port, baudrate=9600, bytesize=8, parity='N', stopbits=1, timeout=0.5, writeTimeout=1)
-
-    while True:
-        i = raw_input()
-        i = i.strip()
-        if i == '+++':
-            pass
-        else:
-            i = i + '\r'
-        print("Sending (%s) ..." % i.strip())
-        ser.write(i)
-        time.sleep(1)
-        print('---> ' + ser.read(80).strip() + '\n')
+        while True:
+            i = raw_input()
+            i = i.strip()
+            if i == '+++':
+                pass
+            else:
+                i = i + '\r'
+            print("Sending (%s) ..." % i.strip())
+            ser.write(i)
+            time.sleep(1)
+            print('---> ' + ser.read(80).strip() + '\n')
 
 -  当进入命令模式以后，所有的命令都是以<CR>来结束，而不是以<LF>。
 
