@@ -46,4 +46,4 @@ Here is a list of files needed to boot Linux kernel:
 With DDR memory available, using initramfs we can already boot into Linux user
 space, without needing any persistent storage.
 
-<To be continued ...>
+To be continued ...
