@@ -4,7 +4,7 @@ Data driven programming means the result of your program, and even the flow of
 your program is determined from a set of input data, rather than hard-coded
 program execution flow.
 
-### Why Data Driven Programming
+# Why Data Driven Programming
 Like any kind of programming and problem solving, you would want to design a
 solution that solves a generic problem, rather than designing specific solution
 for specific problems. Because when the problem changes even a little bit, you
@@ -17,7 +17,7 @@ problems:
 - You don't hard code any data into your program: you read the data from a
   source and provide a well defined interface for getting in data.
 
-### Example on Data Driven Programming
+# Example on Data Driven Programming
 Let's say you want to design a GUI program. But:
 
 - you don't really know what kind of users are going to use it

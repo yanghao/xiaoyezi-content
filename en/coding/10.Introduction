@@ -1,7 +1,7 @@
 Programming in General
 ----------------------
 
-### What the computer can do for you
+# What the computer can do for you
 Computers are extremely good at repeative tasks. It not only handles it 100%
 accurate, it also does it much faster than human beings.
 
@@ -12,7 +12,7 @@ have assumed lots of conditions and knowledges already. And when you ask the
 computer to repeat that task, you at least have to let the computer know all the
 conditions that matters.
 
-### How you command your computer
+# How you command your computer
 It is easy to ask some human beings to do something for you, because we human
 beings have the ability to interpret complex ideas. However, computers are not
 yet on the same level of comprehension capability. Computers only understands
@@ -37,7 +37,7 @@ sequency flow of binary instructions managing a pool of memories, you think
 about class, object. Yet you still need to know the low level details if you
 want to better optimize your code in interpreted languages.
 
-### Programming Language and Solving Problems
+# Programming Language and Solving Problems
 Programming language is the verbs and nouns that let you speak with your
 computer. But when solving real problems, it is how you design the solution.
 
