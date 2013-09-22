@@ -31,5 +31,9 @@ from webapp2, basically only its application and request response model (which i
 I need to implemented the caching policies and generate dynamic page from plain files.
 
 The third and forth requirement defines the user interface, I myself will be the developer as well as the user.
+Whereever I am, I do the edit/commit and push the changes to a public
+repository, a cron job running on the web server polls the public repository
+every 5 minutes and if there is an update, pull the changes and clean the cached
+content in Memcached. The the complete publish flow is automatic.
 
 And that's it, it took me a few days to make it running very stable.
