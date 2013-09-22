@@ -19,22 +19,31 @@ problems:
 
 ### Example on Data Driven Programming
 Let's say you want to design a GUI program. But:
+
 - you don't really know what kind of users are going to use it
+
 - you don't really know what names the user prefer to name a button
+
 - you don't really know the number of buttons a particular user need
 
 Then you could design your GUI program in a way that:
+
 - The program reads a config file to determine various aspects of the look and
   feel
+
 - In the config file, you can re-name all buttons
+
 - In the config file, you can define the number of buttons (and its functions)
 
 This way, you can fast response for new changes by just changing a static file,
 rather than modifying your GUI code to reflect the changes. However a few thing
 need to be careful:
+
 - A well defined interface between the config file and your GUI application
+
 - There is an overhead to design general purpose program: more things need to be
   taken care
+
 - only when it comes to new changes the effort you invested additionally in
   data-driven design can be shown. If an application is never ever going to
   change (it is difficult to predict though), you could probably hard code the
