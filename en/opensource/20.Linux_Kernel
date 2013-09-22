@@ -46,4 +46,41 @@ Here is a list of files needed to boot Linux kernel:
 With DDR memory available, using initramfs we can already boot into Linux user
 space, without needing any persistent storage.
 
+Booting into User Space
+=======================
+Linux kernel booting process is rather complicated. It includes setting console
+initialization, setting up paging for memory management unit, till starting the
+first user space process: init.
+
+And it is the init process that starts up everything else, including getty that
+listens on serial ports, X servers etc.
+
+Cross Compiling
+===============
+Unless you develop for x86 based platform, otherwise it is very likely that you
+will need a cross compiling setup.
+
+Cross Compiling means: you work on x86 machine but want to compile code for
+another architecture, say ARM architecture. Such that you are generating ARM
+binary code on x86 machines.
+
+Ubuntu comes with the cross compiler for ARM in its standard repository, and you
+can just install it via apt-get install:
+
+    $ sudo apt-get install arm-linux-gcc
+
+Get Linux Kernel
+================
+Linux source code is managed in a source code management system called
+[git](http://git-scm.com), you can clone the complete Linux development history
+with:
+
+    $ git clone https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable.git
+
+Compiling Kernel
+================
+
+Test Linux Kernel without real hardware
+=======================================
+
 To be continued ...
